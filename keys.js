@@ -5,4 +5,6 @@ exports.spotify = {
     secret: process.env.SPOTIFY_SECRET
 }
 // exports.band = {}
-// exports.omdb = {}
+exports.omdb = {
+    key: 'trilogy'
+}
