@@ -10,15 +10,24 @@ var Spotify = require('node-spotify-api');
 var spotify = new Spotify(keys.spotify);
 // var moment = requrire('moment');
 
-var userSelection = process.argv[2];
-var mySong = process.argv[3];
+var cmdArgs = process.argv;
+var command = cmdArgs[2];
 
-if (userSelection === 'spotify-this-song' && mySong) {
-    console.log("success");
-    getSong();
+// The parameter to the LIRI command may contain spaces
+var liriArg = '';
+for (var i = 3; i < cmdArgs.length; i++) {
+    liriArg += cmdArgs[i] + ' ';
 }
+
+// var command = process.argv[2];
+// var mySong = process.argv[3];
+
+// if (command === 'spotify-this-song') {
+//     console.log("success");
+//     getMovie
+// }
 // defaulting to "The Sign" by Ace of Base if no song is specified
-// else if (userSelection === 'spotify-this-song' && mySong != true) {
+// else if (command === 'spotify-this-song' && mySong != true) {
 //     console.log("failed");
 //     spotify.search({
 //         type: 'track',
@@ -45,24 +54,46 @@ if (userSelection === 'spotify-this-song' && mySong) {
 // }
 
 // omdb
+// var movieThis = process.argv[2];
 
 
-var movie = "Alpha";
-var queryURL = "https://www.omdbapi.com/?t=" + movie + "&y=&plot=short&apikey=" + keys.omdb;
-$.ajax({
-    url: queryURL,
-    method: "GET"
-}).then(function (response) {
-    createRow(response);
-});
 
+function getMovie() {
+
+    var movieName = process.argv[3];
+    var queryURL = "https://www.omdbapi.com/?t=" + movieName + "&y=&plot=short&apikey=" + keys.omdb.key;
+    if (!movieName) {
+        movieName = "mr nobody"
+    }
+    request(queryURL, function (err, response, body) {
+        if (err) {
+            console.log(err);
+        } else {
+            // console.log(response);
+            var data = JSON.parse(body);
+            console.log(
+                "\n" + "********** Your Movie Information **********\n" +
+                "Title: " + data.Title + "\n" +
+                "Release Year: " + data.Year + "\n" +
+                "IMDB Rating: " + data.imdbRating + "\n" +
+                "Rotten Tomatoes Rating: " + data.Ratings[0].Value + "\n" +
+                "Country: " + data.Country + "\n" +
+                "Language: " + data.Language + "\n" +
+                "Plot: " + data.Plot + "\n" +
+                "Actors: " + data.Actors + "\n" +
+                "********************************************"
+            );
+        }
+    })
+}
 
 
 ///  YET TO DO.....
 // function concertThis(){}
 // function movieThis(){}
-// function DoWhatItSays(){}
 
+// function DoWhatItSays(){}
+// ^^^^
 // fs.readFile("random.txt", "utf8", function (err, data) {
 //     if (err) {
 //         console.log(err);
@@ -72,5 +103,16 @@ $.ajax({
 //     // console.log(dataArr);
 // })
 
-// songName = "Which Way Will You Choose";
-//         console.log("You didn't make a selection, so Randy Travis will ask you repeatedly")
+// invoker
+
+switch (command) {
+    case "movie-this":
+        getMovie();
+        break;
+        // case "spotify-this-song": getSong(); break;
+        // case "concert-this": getConcert(); break;
+        // case "do-what-it-says": doIt(); break;
+    default:
+        console.log("retype your input to properly search.")
+
+}
