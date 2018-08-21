@@ -2,6 +2,7 @@
 
 require("dotenv").config();
 
+
 var fs = require('fs');
 var keys = require('./keys.js');
 var request = require('request');
@@ -10,87 +11,108 @@ var Spotify = require('node-spotify-api');
 var spotify = new Spotify(keys.spotify);
 // var moment = requrire('moment');
 
-var cmdArgs = process.argv;
-var command = cmdArgs[2];
+var command = process.argv[2];
 
 // The parameter to the LIRI command may contain spaces
-var liriArg = '';
-for (var i = 3; i < cmdArgs.length; i++) {
-    liriArg += cmdArgs[i] + ' ';
+// ?????????
+
+// Kick off the right function... 
+if (command === 'spotify-this-song') {
+    console.log('getting your song...')
+    getSong();
+} else if (command === 'movie-this') {
+    console.log('getting your movie....')
+    getMovie();
+} else if (command === 'concert-this') {
+    console.log('getting your concert....')
+    getConcert();
+} else {
+    console.log('end')
 }
 
-// var command = process.argv[2];
-// var mySong = process.argv[3];
 
-// if (command === 'spotify-this-song') {
-//     console.log("success");
-//     getMovie
-// }
-// defaulting to "The Sign" by Ace of Base if no song is specified
-// else if (command === 'spotify-this-song' && mySong != true) {
-//     console.log("failed");
-//     spotify.search({
-//         type: 'track',
-//         query: 'The Sign'
-//     }, function (err, data) {
-//         if (err) {
-//             return console.log('Error occurred: ' + err);
-//         }
+// SPOTIFY ********************************************
 
-//         console.log(JSON.stringify(data, null, 2));
-//     });
-// }
-
-// function getSong() {
-//     spotify.search({
-//         type: 'track',
-//         query: mySong
-//     }, function (err, data) {
-//         if (err) {
-//             console.log(err);
-//         }
-//         console.log(JSON.stringify(data, null, 2));
-//     });
-// }
-
-// omdb
-// var movieThis = process.argv[2];
+function getSong() {
+    var songName = process.argv[3];
+    // default to The Sign if empty
+    if (songName === '') {
+        console.log("failed");
+        spotify.search({
+            type: 'track',
+            query: 'The Sign'
+        }, function (err, data) {
+            if (err) {
+                console.log(err);
+            }
+            console.log('Getting song inside..')
+            console.log(data);
+        })
+        spotify.search({
+            type: 'track',
+            query: songName
+        }, function (err, data) {
+            if (err) {
+                console.log(err);
+            }
+            console.log(JSON.stringify(data, null, 2));
+        });
 
 
+    } // end if stmt
+} // end getSong
+
+
+
+// OMDB ********************************************
 
 function getMovie() {
 
     var movieName = process.argv[3];
-    var queryURL = "https://www.omdbapi.com/?t=" + movieName + "&y=&plot=short&apikey=" + keys.omdb.key;
+    var queryURL = "https://www.omdbapi.com/?apikey=" + keys.omdb.key + "&t=" + movieName + "&plot=full";
+
     if (!movieName) {
-        movieName = "mr nobody"
+        movieName = "mr nobody";
+    } else {
+        request(queryURL, function (err, response, body) {
+            if (err) {
+                console.log(err);
+            } else {
+                var data = JSON.parse(body);
+                console.log(
+                    "\n" + "********** Your Movie Information **********\n" +
+                    "Title: " + data.Title + "\n" +
+                    "Release Year: " + data.Year + "\n" +
+                    "IMDB Rating: " + data.imdbRating + "\n" +
+                    // "Rotten Tomatoes Rating: " + data.Ratings[0].Value + "\n" +
+                    "Country: " + data.Country + "\n" +
+                    "Language: " + data.Language + "\n" +
+                    "Plot: " + data.Plot + "\n" +
+                    "Actors: " + data.Actors + "\n" +
+                    "********************************************"
+                );
+            }
+        })
     }
-    request(queryURL, function (err, response, body) {
-        if (err) {
-            console.log(err);
-        } else {
-            // console.log(response);
-            var data = JSON.parse(body);
-            console.log(
-                "\n" + "********** Your Movie Information **********\n" +
-                "Title: " + data.Title + "\n" +
-                "Release Year: " + data.Year + "\n" +
-                "IMDB Rating: " + data.imdbRating + "\n" +
-                "Rotten Tomatoes Rating: " + data.Ratings[0].Value + "\n" +
-                "Country: " + data.Country + "\n" +
-                "Language: " + data.Language + "\n" +
-                "Plot: " + data.Plot + "\n" +
-                "Actors: " + data.Actors + "\n" +
-                "********************************************"
-            );
-        }
-    })
 }
 
 
-///  YET TO DO.....
-// function concertThis(){}
-// function movieThis(){}
+// BANDS ********************************************
+
+function getConcert() {
+    var artist = process.argv[3];
+    var queryURL = "https://rest.bandsintown.com/artists/" + artist + "/events?app_id=" + keys.concert.id
+    if (command === 'concert-this') {
+        console.log('concert requested...')
+        request(queryURL, function (err, response, body) {
+            var parsedBody = JSON.parse(body);
+            console.log(parsedBody)
+        })
+
+
+    }
+}
+
 
 // function DoWhatItSays(){}
 // ^^^^
@@ -98,21 +120,17 @@ function getMovie() {
 //     if (err) {
 //         console.log(err);
 //     }
-//     console.log(data); // loading from random.txt
-//     // var dataArr = data.split(", ");
-//     // console.log(dataArr);
+// console.log(data); // loading from random.txt
+// var dataArr = data.split(", ");
+// console.log(dataArr);
 // })
 
 // invoker
 
-switch (command) {
-    case "movie-this":
-        getMovie();
-        break;
-        // case "spotify-this-song": getSong(); break;
-        // case "concert-this": getConcert(); break;
-        // case "do-what-it-says": doIt(); break;
-    default:
-        console.log("retype your input to properly search.")
 
-}
+///  YET TO DO.....
+// spotify not working
+// default movie not working
+// not taking more than one word
+// concert this
+// do as i say

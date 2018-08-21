@@ -2,7 +2,9 @@ exports.spotify = {
     id: process.env.SPOTIFY_ID,
     secret: process.env.SPOTIFY_SECRET
 }
-// exports.band = {}
 exports.omdb = {
-    key: 'trilogy'
+    key: process.env.OMBD_KEY
+}
+exports.concert = {
+    id: process.env.CONCERT_ID
 }
